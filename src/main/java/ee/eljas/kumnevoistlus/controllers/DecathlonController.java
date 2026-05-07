@@ -4,6 +4,10 @@ import ee.eljas.kumnevoistlus.entity.Athlete;
 import ee.eljas.kumnevoistlus.entity.DecathlonResult;
 import ee.eljas.kumnevoistlus.repository.AthleteRepository;
 import ee.eljas.kumnevoistlus.repository.DecathlonResultRepository;
+import ee.eljas.kumnevoistlus.dto.AthleteDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +28,19 @@ public class DecathlonController {
     // SPORTLASE LISAMINE JA NÄITAMINE
 
     @GetMapping("/athletes")
-    public List<Athlete> getAthletes() {
-        return athleteRepository.findAll();
+    public Page<AthleteDto> getAthletes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String country,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (direction.equalsIgnoreCase("asc")) {
+            return athleteRepository.findAthletesOrderByPointsAsc(country, pageable);
+        }
+
+        return athleteRepository.findAthletesOrderByPointsDesc(country, pageable);
     }
 
     @PostMapping("/athletes")
